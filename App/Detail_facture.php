@@ -1,11 +1,13 @@
 <?php
 include_once './Connexion.php';
 session_start();
-if (isset($_SESSION["id_f"])) {
+if (isset($_SESSION["id_f"])) $idf=$_SESSION["id_f"];
+if (isset($_GET['id_f'])) $idf=$_GET['id_f'];
+
 
   $info=$pdo->prepare("SELECT f.*,cl.nom,cl.tele,c.ville,c.prix_liv,c.date_liv FROM factures f,commandes c,clients cl
   WHERE cl.id=c.id_client AND c.id=f.id_commande AND f.id=?");
-  $info->bindParam(1,$_SESSION["id_f"]);
+  $info->bindParam(1,$idf);
   $info -> execute();
   $res=$info->fetch(PDO::FETCH_OBJ);
 
@@ -262,5 +264,3 @@ if (isset($_POST["submit"])) {
 </body>
 
 </html>
-
-<?php }
