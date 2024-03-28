@@ -1,77 +1,18 @@
 <?php
 include_once './Connexion.php';
 session_start();
-$stc=$pdo->prepare("SELECT * FROM clients");
-$stc -> execute();
-$cients = $stc -> fetchAll(PDO::FETCH_OBJ);
+if (isset($_SESSION["id_f"])) {
+
+  $info=$pdo->prepare("SELECT f.*,cl.nom,cl.tele,c.ville,c.prix_liv,c.date_liv FROM factures f,commandes c,clients cl
+  WHERE cl.id=c.id_client AND c.id=f.id_commande AND f.id=?");
+  $info->bindParam(1,$_SESSION["id_f"]);
+  $info -> execute();
+  $res=$info->fetch(PDO::FETCH_OBJ);
+
+
 
 if (isset($_POST["submit"])) {
-  $idclient = 0;
-  if (isset($_POST["Cliant_Exist"])) {
-    $id=$_POST["Cliant_Exist"];
-    $st = $pdo->prepare("SELECT * FROM clients WHERE id = $id");
-    $st -> execute();
-    $res = $st -> fetch(PDO::FETCH_OBJ);
-    if ((bool) $res) $idclient = $res->id;
-    
-  }elseif(isset($_POST["Nom"])&&isset($_POST["Tel"])){
-    $nom=$_POST["Nom"];$tel=$_POST["Tel"];
-    $st = $pdo->prepare("INSERT INTO  clients(nom,tele) VALUES ('$nom','$tel')");
-    $res = $st -> execute();
-    if ($res) {
-      $st = $pdo->prepare("SELECT max(id) as 'id' FROM clients");
-      $st -> execute();
-      $res = $st -> fetch(PDO::FETCH_OBJ);
-      if ((bool) $res) $idclient = $res->id;
-    }
-  }
-
-
-  if (
-    isset($_POST["Ville"]) && isset($_POST["PrixLiv"])&& isset($_POST["DateLiv"])
-    && isset($_POST["NbChambres"]) && isset($_POST["LoChambre"]) && isset($_POST["LaChambre"])
-    &&isset($_POST["MC"]) && isset($_POST["PTS"]) && isset($_POST["HS"])
-    &&isset($_POST["G"])&&isset($_POST["Prix"])
-  ) {
-    $prixtotal=0;
-    $ville=$_POST["Ville"] ; $PrixLiv = $_POST["PrixLiv"] ; $DateLiv=$_POST["DateLiv"];
-    $st = $pdo->prepare("INSERT INTO commandes (id_client ,`ville`, `prix_liv`, `state_command`, `date_liv`) 
-    VALUES ($idclient,'$ville', '$PrixLiv', 0, '$DateLiv')");
-    $res = $st -> execute();
-    $prixtotal+=floatval($PrixLiv);
-    $st = $pdo->prepare("SELECT max(id) as 'id' FROM commandes");
-    $st -> execute();
-    $res = $st -> fetch(PDO::FETCH_OBJ);
-    if ((bool) $res) $idcommande = $res->id;
-
-    for ($i=0; $i < $_POST["NbChambres"]; $i++) { 
-      $st = $pdo->prepare("INSERT INTO chambres 
-      (`Longueur`, `Largeur`, `M2`, `nb_Pts`, `HS`, `nb_H`, `id_command`, `Prix`)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
-      $st->bindParam(1,$_POST["LoChambre"][$i]);$st->bindParam(2,$_POST["LaChambre"][$i]);
-      $st->bindParam(3,$_POST["MC"][$i]);$st->bindParam(4,$_POST["PTS"][$i]);
-      $st->bindParam(5,$_POST["HS"][$i]);$st->bindParam(6,$_POST["G"][$i]);
-      $st->bindParam(7,$idcommande);$st->bindParam(8,$_POST["Prix"][$i]);
-      $res = $st -> execute();
-      $prixtotal+=floatval($_POST["Prix"][$i]);
-    }
-
-    $st_facture=$pdo->prepare("INSERT INTO factures (`id_commande`, `id_client`, `prix_total`, `Montant_Reste`) 
-    VALUES (?, ?, ?, ?);");
-    $st_facture->bindParam(1,$idcommande);
-    $st_facture->bindParam(2,$idclient);
-    $st_facture->bindParam(3,$prixtotal);
-    $st_facture->bindParam(4,$prixtotal);
-    $res=$st_facture->execute();
-    if ($res) {
-      $id_facture=$pdo->prepare("SELECT max(id) as 'id' FROM factures");
-      $id_facture->execute();
-      $idf=$id_facture->fetch(PDO::FETCH_OBJ);
-      $_SESSION["id_f"]=$idf->id;
-      header('location:http://localhost/Azrou/App/Detail_facture.php');
-    }
-
-  }else{echo isset($_POST["NbChambres"]);}
+  
 }
 
 
@@ -111,12 +52,12 @@ if (isset($_POST["submit"])) {
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
             </div>
-            <span class="nav-link-text ms-1">Accuil</span>
+            <span class="nav-link-text ms-1">Accuile</span>
           </a>
         </li>
         
         <li class="nav-item">
-          <a class="nav-link " href="http://localhost/Azrou/App/Factures.php">
+          <a class="nav-link active " href="http://localhost/Azrou/App/Factures.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-credit-card text-success text-sm opacity-10"></i>
             </div>
@@ -124,7 +65,7 @@ if (isset($_POST["submit"])) {
           </a>
         </li>
         <li class="nav-item ">
-          <a class="nav-link active" href="http://localhost/Azrou/App/Commandes.php">
+          <a class="nav-link " href="http://localhost/Azrou/App/Commandes.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-app text-info text-sm opacity-10"></i>
             </div>
@@ -161,7 +102,7 @@ if (isset($_POST["submit"])) {
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
-            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Commande</li>
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Détails de la facture</li>
           </ol>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
@@ -191,7 +132,7 @@ if (isset($_POST["submit"])) {
             <div class="card mb-4">
               
             <div class="card-header pb-0">
-              <h5>Nouvel Commande</h5>
+              <h5>Facture</h5>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
               <div class="table-responsive p-0">
@@ -205,7 +146,7 @@ if (isset($_POST["submit"])) {
                                 <div class="d-flex px-2 py-1">
                                 <div class="d-flex col-12 flex-column justify-content-center">
                                     <h6 class="mb-0 text-sm">Nom Complet De Client *</h6>
-                                    <input id="Nom" name="Nom" type="text" class="form-control">
+                                    <input disabled id="Nom" value="<?=$res->nom?>" type="text" class="form-control">
                                 </div>
                                 </div>
                             </td>
@@ -214,20 +155,7 @@ if (isset($_POST["submit"])) {
                                 <div class="d-flex px-2 py-1">
                                 <div class="d-flex col-12 flex-column justify-content-center">
                                     <h6 class="mb-0 text-sm">Tele *</h6>
-                                    <input id="Tel" name="Tel" type="text" class="form-control">
-                                </div>
-                                </div>
-                            </td>
-                            <td class="col-3">
-                                <div class="d-flex px-2 py-1">
-                                <div class="d-flex col-12 flex-column justify-content-center">
-                                    <h6 class="mb-0 text-sm">Cliant Exist</h6>
-                                    <select class="form-select col-12" id="Cliant_Exist">
-                                        <option value="" selected> client </option>
-                                        <?php foreach ($cients as $cleint) : ?>
-                                          <option value="<?=$cleint->id?>">  <?=$cleint->nom?> </option>
-                                       <?php endforeach ?>
-                                    </select>
+                                    <input disabled id="Tel" value="<?=$res->tele?>" type="text" class="form-control">
                                 </div>
                                 </div>
                             </td>
@@ -243,7 +171,7 @@ if (isset($_POST["submit"])) {
                                     <div class="d-flex px-2 py-1">
                                     <div class="d-flex col-12 flex-column justify-content-center">
                                         <h6 class="mb-0 text-sm">Ville *</h6>
-                                        <input id="Ville" name="Ville" type="text" class="form-control">
+                                        <input disabled id="Ville" value="<?=$res->ville?>" type="text" class="form-control">
                                     </div>
                                     </div>
                                 </td>
@@ -251,7 +179,7 @@ if (isset($_POST["submit"])) {
                                     <div class="d-flex px-2 py-1">
                                     <div class="d-flex col-12 flex-column justify-content-center">
                                         <h6 class="mb-0 text-sm">Prix de Livraison *</h6>
-                                        <input id="PrixLiv" name="PrixLiv" type="text" class="form-control">
+                                        <input disabled id="PrixLiv" value="<?=$res->prix_liv?>" type="text" class="form-control">
                                     </div>
                                     </div>
                                 </td>
@@ -259,7 +187,7 @@ if (isset($_POST["submit"])) {
                                     <div class="d-flex px-2 py-1">
                                     <div class="d-flex col-12 flex-column justify-content-center">
                                         <h6 class="mb-0 text-sm">Date de Livraison *</h6>
-                                        <input id="DateLiv" name="DateLiv" type="date" class="form-control">
+                                        <input disabled id="DateLiv" value="<?=$res->date_liv?>" type="date" class="form-control">
                                     </div>
                                     </div>
                                 </td>
@@ -267,44 +195,48 @@ if (isset($_POST["submit"])) {
                         </tbody>
                     </table>
                     <!-- #### Chambres info #### -->
-                    <h6 class="card-header text-success">Chambres Info</h6>
+                    <h6 class="card-header text-success">Facture Info</h6>
                     <table class="table align-items-center mb-0">
                         <tbody>
                             <tr class="d-flex justify-content-around">
                                 <td>
                                     <div class="d-flex px-2 py-1">
                                     <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">Nombre Des Chambres</h6>
-                                        <input id="NbChambres" name="NbChambres" type="text" class="form-control">
+                                        <h6 class="mb-0 text-sm">#ID Facture</h6>
+                                        <input disabled id="NbChambres" value="<?=$res->id?>" type="text" class="form-control">
                                     </div>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="d-flex px-2 py-1">
                                     <div class="d-flex flex-column justify-content-center">
-                                    <h6 class="mb-0 text-sm">Créer</h6>
-                                        <i id="Ajouterchambres" class="btn btn-primary">Créer Chambres</i>
+                                        <h6 class="mb-0 text-sm">Prix Totale (DH)</h6>
+                                        <input disabled id="NbChambres" value="<?=$res->prix_total?>" type="text" class="form-control">
                                     </div>
                                     </div>
                                 </td>
+                                <td>
+                                    <div class="d-flex px-2 py-1">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">Montant Paye (DH) </h6>
+                                        <input id="NbChambres" name="Mpaye" value="<?=$res->Montant_Paye?>" type="text" class="form-control">
+                                    </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex px-2 py-1">
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">Le Reste (DH) </h6>
+                                        <input id="NbChambres" disabled value="<?=$res->Montant_Reste?>" type="text" class="form-control">
+                                    </div>
+                                    </div>
+                                </td>
+                                
                             </tr>
                         </tbody>
                     </table>
-
-                    <!-- Donne des Chambres -->
-                    <table class="table align-items-center mb-0">
-                        <tbody id="tableChambre">
-                            
-                        </tbody>
-                    </table>
-                    <div id="Calculer" class="btn btn-primary ms-4">Calculer</div>
-                    <h6 id="Tres" class="card-header  text-success">Resultat</h6>
-                    <table class="table align-items-center mb-0">
-                        <tbody id="tableResultat">
-
-                        </tbody>
-                    </table>
-                    <input id="submit" name="submit" class="btn btn-dark col-4 mx-auto mx-auto" type="submit" value="Ajouter Commande">
+                    
+                    <input id="submit" name="submit" class="btn btn-dark col-4 mx-auto d-block" type="submit" value="Enregistrer La Facture">
                 </form>
                 
               </div>
@@ -330,3 +262,5 @@ if (isset($_POST["submit"])) {
 </body>
 
 </html>
+
+<?php }
