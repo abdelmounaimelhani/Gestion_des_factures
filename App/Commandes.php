@@ -1,3 +1,65 @@
+<?php
+include_once './Connexion.php';
+
+$stc=$pdo->prepare("SELECT * FROM clients");
+$stc -> execute();
+$cients = $stc -> fetchAll(PDO::FETCH_OBJ);
+
+if (isset($_POST["submit"])) {
+  $idclient = 0;
+  if (isset($_POST["Cliant_Exist"])) {
+    $id=$_POST["Cliant_Exist"];
+    $st = $pdo->prepare("SELECT * FROM clients WHERE id = $id");
+    $st -> execute();
+    $res = $st -> fetch(PDO::FETCH_OBJ);
+    if ((bool) $res) $idclient = $res->id;
+    
+  }elseif(isset($_POST["Nom"])&&isset($_POST["Tel"])){
+    $nom=$_POST["Nom"];$tel=$_POST["Tel"];
+    $st = $pdo->prepare("INSERT INTO  clients(nom,tele) VALUES ('$nom','$tel')");
+    $res = $st -> execute();
+    if ($res) {
+      $st = $pdo->prepare("SELECT max(id) as 'id' FROM clients");
+      $st -> execute();
+      $res = $st -> fetch(PDO::FETCH_OBJ);
+      if ((bool) $res) $idclient = $res->id;
+    }
+  }
+
+
+  if (
+    isset($_POST["Ville"]) && isset($_POST["PrixLiv"])&& isset($_POST["DateLiv"])
+    && isset($_POST["NbChambres"]) && isset($_POST["LoChambre"]) && isset($_POST["LaChambre"])
+    &&isset($_POST["MC"]) && isset($_POST["PTS"]) && isset($_POST["HS"])
+    &&isset($_POST["G"])&&isset($_POST["Prix"])
+  ) {
+    $ville=$_POST["Ville"] ; $PrixLiv = $_POST["PrixLiv"] ; $DateLiv=$_POST["DateLiv"];
+    $st = $pdo->prepare("INSERT INTO commandes (id_client ,`ville`, `prix_liv`, `state_command`, `date_liv`) VALUES ($idclient,'$ville', '$PrixLiv', 0, '$DateLiv')");
+    $res = $st -> execute();
+
+    $st = $pdo->prepare("SELECT max(id) as 'id' FROM commandes");
+    $st -> execute();
+    $res = $st -> fetch(PDO::FETCH_OBJ);
+    if ((bool) $res) $idcommande = $res->id;
+
+    for ($i=0; $i < $_POST["NbChambres"]; $i++) { 
+      $st = $pdo->prepare("INSERT INTO chambres 
+      (`Longueur`, `Largeur`, `M2`, `nb_Pts`, `HS`, `nb_H`, `id_command`, `Prix`)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+      $st->bindParam(1,$_POST["LoChambre"][$i]);$st->bindParam(2,$_POST["LaChambre"][$i]);
+      $st->bindParam(3,$_POST["MC"][$i]);$st->bindParam(4,$_POST["PTS"][$i]);
+      $st->bindParam(5,$_POST["HS"][$i]);$st->bindParam(6,$_POST["G"][$i]);
+      $st->bindParam(7,$idcommande);$st->bindParam(8,$_POST["Prix"][$i]);
+      $res = $st -> execute();
+    }
+
+  }else{echo isset($_POST["NbChambres"]);}
+}
+
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
  
@@ -6,9 +68,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="./assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="./assets/img/favicon.png">
-  <title>
-    Azrou Sani
-  </title>
+  <title>Azrou Sani</title>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <link href="./assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="./assets/css/nucleo-svg.css" rel="stylesheet" />
@@ -21,11 +81,9 @@
   <div class="min-height-300 bg-primary position-absolute w-100"></div>
   <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4 " id="sidenav-main">
     <div class="sidenav-header">
-      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/argon-dashboard/pages/dashboard.html " target="_blank">
-        <img src="./assets/img/logo-ct-dark.png" class="navbar-brand-img h-100" alt="main_logo">
-        <span class="ms-1 font-weight-bold">Azrou Sani</span>
-      </a>
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>        
+        <h3 class="ms-1 font-weight-bold">Azrou Sani</h3>
+      
     </div>
     <hr class="horizontal dark mt-0">
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
@@ -85,7 +143,7 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Pages</a></li>
-            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Accuil</li>
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Commande</li>
           </ol>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
@@ -119,7 +177,7 @@
             </div>
             <div class="card-body px-0 pt-0 pb-2">
               <div class="table-responsive p-0">
-                  <form id="From" action="">
+                  <form id="From" action="" method="post">
                     <!-- #### Client info #### -->
                     <h6 class="card-header text-success">Client Info</h6>
                     <table class="table align-items-center mb-0">
@@ -146,9 +204,11 @@
                                 <div class="d-flex px-2 py-1">
                                 <div class="d-flex col-12 flex-column justify-content-center">
                                     <h6 class="mb-0 text-sm">Cliant Exist</h6>
-                                    <select class="form-select col-12" name="Cliant_Exist" id="Cliant_Exist">
-                                        <option disabled selected>Cliant Exist </option>
-                                        <!-- Code php poure recupere les Client -->
+                                    <select class="form-select col-12" id="Cliant_Exist">
+                                        <option value="" selected> client </option>
+                                        <?php foreach ($cients as $cleint) : ?>
+                                          <option value="<?=$cleint->id?>">  <?=$cleint->nom?> </option>
+                                       <?php endforeach ?>
                                     </select>
                                 </div>
                                 </div>
@@ -204,8 +264,8 @@
                                 <td>
                                     <div class="d-flex px-2 py-1">
                                     <div class="d-flex flex-column justify-content-center">
-                                    <h6 class="mb-0 text-sm">Ajouter</h6>
-                                        <i id="Ajouterchambres" class="btn btn-primary">Ajoute Chambres</i>
+                                    <h6 class="mb-0 text-sm">Créer</h6>
+                                        <i id="Ajouterchambres" class="btn btn-primary">Créer Chambres</i>
                                     </div>
                                     </div>
                                 </td>
@@ -222,9 +282,11 @@
                     <div id="Calculer" class="btn btn-primary ms-4">Calculer</div>
                     <h6 id="Tres" class="card-header  text-success">Resultat</h6>
                     <table class="table align-items-center mb-0">
-                        <tbody id="tableResultat"></tbody>
+                        <tbody id="tableResultat">
+
+                        </tbody>
                     </table>
-                    <input id="submit" class="btn btn-dark col-4 mx-auto mx-auto" type="submit" value="Ajouter Commande">
+                    <input id="submit" name="submit" class="btn btn-dark col-4 mx-auto mx-auto" type="submit" value="Ajouter Commande">
                 </form>
                 
               </div>

@@ -1,9 +1,11 @@
 let Nom=document.getElementById('Nom')
+let Tel=document.getElementById('Tel')
+let Ville=document.getElementById('Ville')
+let PrixLiv=document.getElementById('PrixLiv')
+let DateLiv=document.getElementById('DateLiv')
+
 let nbCh=0
-let From=document.getElementById('From')
-From.addEventListener('submit',(e)=>{
-    e.preventDefault()
-})
+
 //########### Aficher la formelure poure rempliare les donnes des Chambres
 let NbChambres=document.getElementById('NbChambres')
 let Ajouterchambres=document.getElementById('Ajouterchambres')
@@ -23,14 +25,14 @@ function CreteCh(i){
     td2.innerHTML=`<div class="d-flex px-2 py-1">
                         <div class="d-flex flex-column justify-content-center">
                             <h6 class="mb-0 text-sm">Longueur</h6>
-                            <input name="LoChambre${i}" id="LoChambre${i}" type="text" class="form-control">
+                            <input name="LoChambre[]" id="LoChambre${i}" type="text" class="form-control">
                         </div>
                     </div>`
     let td3=document.createElement('td')
     td3.innerHTML=`<div class="d-flex px-2 py-1">
                         <div class="d-flex flex-column justify-content-center">
                             <h6 class="mb-0 text-sm">Largeur</h6>
-                            <input name="LaChambre${i}" id="LaChambre${i}" type="text" class="form-control">
+                            <input name="LaChambre[]" id="LaChambre${i}" type="text" class="form-control">
                         </div>
                     </div>`
     tr.appendChild(td1)
@@ -80,7 +82,7 @@ function trres(res){
     M2.innerHTML=`<div class="d-flex px-2 py-1">
                 <div class="d-flex flex-column justify-content-center">
                     <h6 class="mb-0 text-sm">M²</h6>
-                    <input id="MC${res.index}" disabled type="text" class="form-control" value="${res.M2}">
+                    <input id="MC${res.index}" name="MC[]"  type="text" class="form-control" value="${res.M2}">
                 </div>
             </div>`
     tr.appendChild(M2);
@@ -89,7 +91,7 @@ function trres(res){
     PTS.innerHTML=`<div class="d-flex px-2 py-1">
                     <div class="d-flex flex-column justify-content-center">
                         <h6 class="mb-0 text-sm">Nb PTS</h6>
-                        <input id="PTS${res.index}" value="${res.PTS}" disabled type="text" class="form-control">
+                        <input id="PTS${res.index}" name="PTS[]" value="${res.PTS}"  type="text" class="form-control">
                     </div>
                 </div>`
     tr.appendChild(PTS);
@@ -98,7 +100,7 @@ function trres(res){
     HS.innerHTML=`<div class="d-flex px-2 py-1">
                     <div class="d-flex flex-column justify-content-center">
                         <h6 class="mb-0 text-sm">Nb HS</h6>
-                        <input id="HS${res.index}" value="${res.HS}" disabled type="text" class="form-control">
+                        <input id="HS${res.index}" name="HS[]" value="${res.HS}"  type="text" class="form-control">
                     </div>
                 </div>
     `
@@ -107,7 +109,7 @@ function trres(res){
     G.innerHTML=`<div class="d-flex px-2 py-1">
                 <div class="d-flex flex-column justify-content-center">
                     <h6 class="mb-0 text-sm">Nb G</h6>
-                    <input id="HS${res.index}" value="${res.G}" disabled type="text" class="form-control">
+                    <input id="G${res.index}" name="G[]" value="${res.G}"  type="text" class="form-control">
                 </div>
                 </div>
     `
@@ -117,7 +119,7 @@ function trres(res){
     Prix.innerHTML=`<div class="d-flex px-2 py-1">
                     <div class="d-flex flex-column justify-content-center">
                         <h6 class="mb-0 text-sm">Prix</h6>
-                        <input id="Prix${res.index}" value="${res.Prix}" disabled type="text" class="form-control">
+                        <input id="Prix${res.index}" name="Prix[]" value="${res.Prix}"  type="text" class="form-control">
                     </div>
                 </div>
     `
@@ -157,3 +159,45 @@ function calculerMat(){
 }
 
 Calculer.addEventListener('click',calculerMat)
+
+function validinput(elm){
+    if (elm.value.trim()=="") {
+        elm.style.border="1px solid red"
+    }else elm.style.border="1px solid black"
+}
+
+
+let From=document.getElementById('From')
+From.addEventListener('submit',(e)=>{
+    
+    validinput(Nom);validinput(Tel);validinput(Ville)
+    validinput(PrixLiv);validinput(DateLiv)
+
+    if (Nom.value.trim() != '' && Tel.value.trim() != '' && Ville.value.trim() != '' && 
+    PrixLiv.value.trim() != ''&& !isNaN(PrixLiv.value.trim()) && DateLiv.value.trim() != '')
+    {   
+        
+    }else{
+        e.preventDefault()
+    }
+})
+
+let Cliant_Exist=document.getElementById('Cliant_Exist')
+function handleChange(e){
+    if (e.target.value == "") {
+        Nom.removeAttribute("disabled");
+        Tel.removeAttribute("disabled");
+        Nom.value = "";
+        Tel.value = "";
+        Cliant_Exist.removeAttribute("name");
+    } else {
+        Cliant_Exist.setAttribute("name", "Cliant_Exist");
+        Nom.setAttribute("disabled", true);
+        Tel.setAttribute("disabled", true);
+        Nom.value = "---------";
+        Tel.value = "---------";
+    }
+    console.log(e.target.value)
+}
+
+Cliant_Exist.addEventListener("change",handleChange)
