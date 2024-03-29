@@ -1,4 +1,14 @@
+<?php
 
+include_once "./Connexion.php";
+session_start();
+if (!isset($_SESSION["conn"])) {
+	header("location:http://localhost/Azrou-Sani/Login/");
+}
+$st=$pdo->prepare("SELECT * FROM clients");
+$st -> execute();
+$res= $st->fetchAll(PDO::FETCH_OBJ);
+?>
 <!DOCTYPE html>
 <html lang="en">
  
@@ -124,42 +134,46 @@
                 <table class="table align-items-center mb-0">
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#ID_Facture</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Montant Total</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Montant paye</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Montant Restant</th>
-                      <th class="text-secondary opacity-7"></th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#ID</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">nom</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Tele</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Action</th>
                     </tr>
                   </thead>
                   <tbody>
+                  <?php if (count($res)>0) {
+                   foreach ($res as $c) : ?>
                     <tr>
+                    <td>
+                        <p class="text-xs font-weight-bold mb-0"><?=$c->id?></p>
+                      </td>
                       <td>
                         <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="../assets/img/team-4.jpg" class="avatar avatar-sm me-3" alt="user6">
-                          </div>
                           <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Miriam Eric</h6>
-                            <p class="text-xs text-secondary mb-0">miriam@creative-tim.com</p>
+                            <h6 class="mb-0 text-sm"><?=$c->nom?></h6>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <p class="text-xs font-weight-bold mb-0">Programtor</p>
-                        <p class="text-xs text-secondary mb-0">Developer</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-secondary">Offline</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">14/09/20</span>
+                        <p class="text-xs font-weight-bold mb-0"><?=$c->tele?></p>
                       </td>
                       <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
+                        <a href="http://localhost/Azrou-Sani/App/Factures.php?client=<?=$c->id?>" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                          Les Factures
                         </a>
                       </td>
                     </tr>
+                    <?php endforeach;}else{ ?>
+                      <tr>
+                      <td colspan="5" >
+                        <div class="d-flex px-2 py-1">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm text-center">Il n'y a pas des Clients</h6>
+                          </div>
+                        </div>
+                      </td>
+                      </tr>
+                      <?php } ?>
                   </tbody>
                 </table>
               </div>

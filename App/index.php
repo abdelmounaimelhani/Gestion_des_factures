@@ -1,10 +1,14 @@
 <?php
 include_once "./Connexion.php";
+session_start();
+if (!isset($_SESSION["conn"])) {
+	header("location:http://localhost/Azrou-Sani/Login/");
+}
 $st=$pdo->prepare("SELECT * FROM clients");
 $st->execute();
 $clients= $st->fetchAll(PDO::FETCH_OBJ);
 
-$st=$pdo->prepare("SELECT f.id,f.prix_total,f.Date_facture,c.nom FROM factures f ,clients c WHERE f.id_client=c.id ORDER BY f.Date_facture");
+$st=$pdo->prepare("SELECT f.id,f.prix_total,f.Date_facture,c.nom FROM factures f ,clients c WHERE f.id_client=c.id ORDER BY f.Date_facture DESC");
 $st->execute();
 $Factures= $st->fetchAll(PDO::FETCH_OBJ);
 ?>

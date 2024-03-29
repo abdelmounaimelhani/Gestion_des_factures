@@ -1,8 +1,11 @@
 <?php
 include_once './Connexion.php';
 session_start();
-if (isset($_SESSION["id_f"])) $idf=$_SESSION["id_f"];
-elseif (isset($_GET['id_f'])) $idf=$_GET['id_f'];
+if (!isset($_SESSION["conn"])) {
+	header("location:http://localhost/Azrou-Sani/Login/");
+}
+if (isset($_GET['id_f'])) $idf=$_GET['id_f'];
+elseif (isset($_SESSION["id_f"])) $idf=$_SESSION["id_f"];
 else header('location:');
   $info=$pdo->prepare("SELECT f.*,cl.nom,cl.tele,c.ville,c.prix_liv,c.date_liv 
   FROM factures f,commandes c,clients cl

@@ -1,4 +1,20 @@
-
+<?php
+include_once './Connexion.php';
+session_start();
+if (!isset($_SESSION["conn"])) {
+	header("location:http://localhost/Azrou-Sani/Login/");
+}
+if (isset($_GET["client"])) {
+    $st=$pdo->prepare("SELECT f.*,c.nom FROM factures f,clients c WHERE f.id_client = c.id AND c.id=? order by f.id desc");
+    $st->bindParam(1,$_GET["client"]);
+    $st->execute();
+    $Factures=$st->fetchAll(PDO::FETCH_OBJ);
+}else{
+  $st=$pdo->prepare("SELECT f.*,c.nom FROM factures f,clients c WHERE f.id_client = c.id order by f.id desc");
+  $st->execute();
+  $Factures=$st->fetchAll(PDO::FETCH_OBJ);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
  
@@ -125,41 +141,59 @@
                   <thead>
                     <tr>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#ID_Facture</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Montant Total</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Montant Total</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Montant paye</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Montant Restant</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut de la facture</th>
                       <th class="text-secondary opacity-7"></th>
                     </tr>
                   </thead>
                   <tbody>
+                  <?php if (count($Factures)>0) {
+                   foreach ($Factures as $Facture) : ?>
                     <tr>
                       <td>
                         <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="../assets/img/team-4.jpg" class="avatar avatar-sm me-3" alt="user6">
-                          </div>
                           <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Miriam Eric</h6>
-                            <p class="text-xs text-secondary mb-0">miriam@creative-tim.com</p>
+                            <h6 class="mb-0 text-sm text-center"><?=$Facture->id?></h6>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <p class="text-xs font-weight-bold mb-0">Programtor</p>
-                        <p class="text-xs text-secondary mb-0">Developer</p>
+                        <p class="text-xs font-weight-bold mb-0 text-center"><?=$Facture->nom?></p>
                       </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-secondary">Offline</span>
+                      <td>
+                        <p class="text-xs font-weight-bold mb-0 text-center"><?=$Facture->prix_total?></p>
                       </td>
                       <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">14/09/20</span>
+                        <span class="text-secondary text-xs font-weight-bold text-center"><?=$Facture->Montant_Paye?></span>
+                      </td>
+                      <td class="align-middle text-center text-sm">
+                        <?php if($Facture->Montant_Reste==0){ ?>
+                        <span class="badge badge-sm bg-gradient-success text-center">PAYE</span>
+                        <?php }else{ ?>
+                          <span class="badge badge-sm bg-gradient-danger text-center">NON PAYE</span>
+                        <?php } ?>
+
                       </td>
                       <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
+                        <a href="http://localhost/Azrou-Sani/App/Detail_facture.php?id_f=<?=$Facture->id?>" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                          Plus Info
                         </a>
                       </td>
                     </tr>
+                    <?php endforeach;}else{ ?>
+                      <tr>
+                      <td colspan="5" >
+                        <div class="d-flex px-2 py-1">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm text-center">Il n'y a pas des Factures</h6>
+                          </div>
+                        </div>
+                      </td>
+                      </tr>
+                      <?php } ?>
+                    
                   </tbody>
                 </table>
               </div>

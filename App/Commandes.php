@@ -1,6 +1,10 @@
 <?php
 include_once './Connexion.php';
 session_start();
+if (!isset($_SESSION["conn"])) {
+	header("location:http://localhost/Azrou-Sani/Login/");
+}
+
 $stc=$pdo->prepare("SELECT * FROM clients");
 $stc -> execute();
 $cients = $stc -> fetchAll(PDO::FETCH_OBJ);
