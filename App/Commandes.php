@@ -29,7 +29,7 @@ if (isset($_POST["submit"])) {
 
   if (
     isset($_POST["Ville"]) && isset($_POST["PrixLiv"])&& isset($_POST["DateLiv"])
-    && isset($_POST["NbChambres"]) && isset($_POST["LoChambre"]) && isset($_POST["LaChambre"])
+    && isset($_POST["NbChambres"]) && isset($_POST["Axe"]) && isset($_POST["Vide"])
     &&isset($_POST["MC"]) && isset($_POST["PTS"]) && isset($_POST["HS"])
     &&isset($_POST["G"])&&isset($_POST["Prix"])
   ) {
@@ -46,9 +46,9 @@ if (isset($_POST["submit"])) {
 
     for ($i=0; $i < $_POST["NbChambres"]; $i++) { 
       $st = $pdo->prepare("INSERT INTO chambres 
-      (`Longueur`, `Largeur`, `M2`, `nb_Pts`, `HS`, `nb_H`, `id_command`, `Prix`)
+      (`Axe`, `Vide`, `M2`, `nb_Pts`, `HS`, `nb_H`, `id_command`, `Prix`)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
-      $st->bindParam(1,$_POST["LoChambre"][$i]);$st->bindParam(2,$_POST["LaChambre"][$i]);
+      $st->bindParam(1,$_POST["Axe"][$i]);$st->bindParam(2,$_POST["Vide"][$i]);
       $st->bindParam(3,$_POST["MC"][$i]);$st->bindParam(4,$_POST["PTS"][$i]);
       $st->bindParam(5,$_POST["HS"][$i]);$st->bindParam(6,$_POST["G"][$i]);
       $st->bindParam(7,$idcommande);$st->bindParam(8,$_POST["Prix"][$i]);
@@ -68,10 +68,10 @@ if (isset($_POST["submit"])) {
       $id_facture->execute();
       $idf=$id_facture->fetch(PDO::FETCH_OBJ);
       $_SESSION["id_f"]=$idf->id;
-      header('location:http://localhost/Azrou/App/Detail_facture.php');
+      header('location:http://localhost/Azrou-Sani/App/Detail_facture.php');
     }
 
-  }else{echo isset($_POST["NbChambres"]);}
+  }else{echo "errrr";}
 }
 
 
@@ -100,14 +100,15 @@ if (isset($_POST["submit"])) {
   <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4 " id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>        
-        <h3 class="ms-1 font-weight-bold">Azrou Sani</h3>
-      
+      <a class="navbar-brand m-0">
+        <span class="ms-1 font-weight-bold">Azrou Sani</span>
+      </a>
     </div>
     <hr class="horizontal dark mt-0">
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="http://localhost/Azrou/App/">
+          <a class="nav-link" href="http://localhost/Azrou-Sani/App/">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
             </div>
@@ -116,7 +117,7 @@ if (isset($_POST["submit"])) {
         </li>
         
         <li class="nav-item">
-          <a class="nav-link " href="http://localhost/Azrou/App/Factures.php">
+          <a class="nav-link " href="http://localhost/Azrou-Sani/App/Factures.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-credit-card text-success text-sm opacity-10"></i>
             </div>
@@ -124,7 +125,7 @@ if (isset($_POST["submit"])) {
           </a>
         </li>
         <li class="nav-item ">
-          <a class="nav-link active" href="http://localhost/Azrou/App/Commandes.php">
+          <a class="nav-link active" href="http://localhost/Azrou-Sani/App/Commandes.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-app text-info text-sm opacity-10"></i>
             </div>
@@ -134,7 +135,7 @@ if (isset($_POST["submit"])) {
         
         
         <li class="nav-item">
-          <a class="nav-link " href="http://localhost/Azrou/App/Clients.php">
+          <a class="nav-link " href="http://localhost/Azrou-Sani/App/Clients.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
             </div>
@@ -143,7 +144,7 @@ if (isset($_POST["submit"])) {
         </li>
         
         <li class="nav-item">
-          <a class="nav-link " href="http://localhost/Azrou/App/Deconnexion.php">
+          <a class="nav-link " href="http://localhost/Azrou-Sani/App/Deconnexion.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-collection text-info text-sm opacity-10"></i>
             </div>
@@ -173,7 +174,7 @@ if (isset($_POST["submit"])) {
           </div>
           <ul class="navbar-nav  justify-content-end">
             <li class="nav-item d-flex align-items-center">
-              <a href="http://localhost/Azrou/App/Profil.php" class="nav-link text-white font-weight-bold px-0">
+              <a href="http://localhost/Azrou-Sani/App/Profil.php" class="nav-link text-white font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
                 <span class="d-sm-inline d-none">Profile</span>
               </a>

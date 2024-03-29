@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS `admins` (
 
 CREATE TABLE IF NOT EXISTS `chambres` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `Longueur` float DEFAULT NULL,
-  `Largeur` float DEFAULT NULL,
+  `Axe` float DEFAULT NULL,
+  `Vide` float DEFAULT NULL,
   `M2` float NOT NULL,
   `nb_Pts` int(11) NOT NULL,
   `HS` int(11) NOT NULL,

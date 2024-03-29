@@ -2,19 +2,38 @@
 include_once './Connexion.php';
 session_start();
 if (isset($_SESSION["id_f"])) $idf=$_SESSION["id_f"];
-if (isset($_GET['id_f'])) $idf=$_GET['id_f'];
-
-
-  $info=$pdo->prepare("SELECT f.*,cl.nom,cl.tele,c.ville,c.prix_liv,c.date_liv FROM factures f,commandes c,clients cl
+elseif (isset($_GET['id_f'])) $idf=$_GET['id_f'];
+else header('location:');
+  $info=$pdo->prepare("SELECT f.*,cl.nom,cl.tele,c.ville,c.prix_liv,c.date_liv 
+  FROM factures f,commandes c,clients cl
   WHERE cl.id=c.id_client AND c.id=f.id_commande AND f.id=?");
   $info->bindParam(1,$idf);
   $info -> execute();
   $res=$info->fetch(PDO::FETCH_OBJ);
 
+  $stch=$pdo->prepare("SELECT ch.* FROM chambres ch ,commandes c,factures f
+  WHERE ch.id_command=c.id AND c.id=f.id_commande AND f.id=?");
+  $stch->bindParam(1,$idf);
+  $stch -> execute();
+  $chs=$stch->fetchAll(PDO::FETCH_OBJ);
+  $cpt=0;
 
-
-if (isset($_POST["submit"])) {
-  
+if (isset($_POST["submit"]) && isset($_POST["Mpaye"])) {
+  if ($_POST["Mpaye"]<=$res->Montant_Reste && $_POST["Mpaye"]+$res->Montant_Paye <= $res->prix_total) {
+    $rest=floatval($res->Montant_Reste)-floatval($_POST["Mpaye"]);
+    $peye=$_POST["Mpaye"]+$res->Montant_Paye;
+    $st=$pdo->prepare("UPDATE `az`.`factures` SET `Montant_Paye`=?, `Montant_Reste`=? WHERE  `id`=?;");
+    $st->bindParam(1,$peye);
+    $st->bindParam(2,$rest);
+    $st->bindParam(3,$idf);
+    $st -> execute();
+  }
+  $info=$pdo->prepare("SELECT f.*,cl.nom,cl.tele,c.ville,c.prix_liv,c.date_liv 
+  FROM factures f,commandes c,clients cl
+  WHERE cl.id=c.id_client AND c.id=f.id_commande AND f.id=?");
+  $info->bindParam(1,$idf);
+  $info -> execute();
+  $res=$info->fetch(PDO::FETCH_OBJ);
 }
 
 
@@ -50,7 +69,7 @@ if (isset($_POST["submit"])) {
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="http://localhost/Azrou/App/">
+          <a class="nav-link" href="http://localhost/Azrou-Sani/App/">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
             </div>
@@ -59,7 +78,7 @@ if (isset($_POST["submit"])) {
         </li>
         
         <li class="nav-item">
-          <a class="nav-link active " href="http://localhost/Azrou/App/Factures.php">
+          <a class="nav-link active " href="http://localhost/Azrou-Sani/App/Factures.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-credit-card text-success text-sm opacity-10"></i>
             </div>
@@ -67,7 +86,7 @@ if (isset($_POST["submit"])) {
           </a>
         </li>
         <li class="nav-item ">
-          <a class="nav-link " href="http://localhost/Azrou/App/Commandes.php">
+          <a class="nav-link " href="http://localhost/Azrou-Sani/App/Commandes.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-app text-info text-sm opacity-10"></i>
             </div>
@@ -77,7 +96,7 @@ if (isset($_POST["submit"])) {
         
         
         <li class="nav-item">
-          <a class="nav-link " href="http://localhost/Azrou/App/Clients.php">
+          <a class="nav-link " href="http://localhost/Azrou-Sani/App/Clients.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
             </div>
@@ -86,7 +105,7 @@ if (isset($_POST["submit"])) {
         </li>
         
         <li class="nav-item">
-          <a class="nav-link " href="http://localhost/Azrou/App/Deconnexion.php">
+          <a class="nav-link " href="http://localhost/Azrou-Sani/App/Deconnexion.php">
             <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-collection text-info text-sm opacity-10"></i>
             </div>
@@ -116,7 +135,7 @@ if (isset($_POST["submit"])) {
           </div>
           <ul class="navbar-nav  justify-content-end">
             <li class="nav-item d-flex align-items-center">
-              <a href="http://localhost/Azrou/App/Profil.php" class="nav-link text-white font-weight-bold px-0">
+              <a href="http://localhost/Azrou-Sani/App/Profil.php" class="nav-link text-white font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
                 <span class="d-sm-inline d-none">Profile</span>
               </a>
@@ -196,6 +215,63 @@ if (isset($_POST["submit"])) {
                             </tr>
                         </tbody>
                     </table>
+
+                    <h6 class="card-header text-success">Chambre Info</h6>
+                    <table class="table align-items-center mb-0">
+                      <tbody id="tableResultat">
+                        <?php foreach ($chs as $ch) : $cpt++ ?>
+                        <tr class="d-flex,justify-content-around">
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                              <div class="d-flex flex-column justify-content-center">
+                                <h6 class="mb-0 text-sm">Chambre N° <?=$cpt?></h6>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                              <div class="d-flex flex-column justify-content-center">
+                                <h6 class="mb-0 text-sm">M²</h6>
+                                <input id="MC1" disabled type="text" class="form-control" value="<?=$ch->M2?>">
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                              <div class="d-flex flex-column justify-content-center">
+                                  <h6 class="mb-0 text-sm">Nb PTS</h6>
+                                  <input id="PTS1" disabled value="<?=$ch->nb_Pts?>" type="text" class="form-control">
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 text-sm">Nb HS</h6>
+                                    <input id="HS1" disabled value="<?=$ch->HS?>" type="text" class="form-control">
+                                </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                              <div class="d-flex flex-column justify-content-center">
+                                  <h6 class="mb-0 text-sm">Nb G</h6>
+                                  <input id="G1" disabled value="<?=$ch->nb_H?>" type="text" class="form-control">
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex px-2 py-1">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 text-sm">Prix</h6>
+                                    <input id="Prix1" disabled value="<?=$ch->Prix?>" type="text" class="form-control">
+                                </div>
+                            </div>
+                          </td>
+                        </tr>
+                        <?php endforeach; ?>
+                      </tbody>
+                    </table>
                     <!-- #### Chambres info #### -->
                     <h6 class="card-header text-success">Facture Info</h6>
                     <table class="table align-items-center mb-0">
@@ -219,10 +295,10 @@ if (isset($_POST["submit"])) {
                                 </td>
                                 <td>
                                     <div class="d-flex px-2 py-1">
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">Montant Paye (DH) </h6>
-                                        <input id="NbChambres" name="Mpaye" value="<?=$res->Montant_Paye?>" type="text" class="form-control">
-                                    </div>
+                                      <div class="d-flex flex-column justify-content-center">
+                                          <h6 class="mb-0 text-sm">Montant Paye (DH) </h6>
+                                          <input id="NbChambres" disabled value="<?=$res->Montant_Paye?>" type="text" class="form-control">
+                                      </div>
                                     </div>
                                 </td>
                                 <td>
@@ -233,7 +309,14 @@ if (isset($_POST["submit"])) {
                                     </div>
                                     </div>
                                 </td>
-                                
+                                <td>
+                                    <div class="d-flex px-2 py-1">
+                                      <div class="d-flex flex-column justify-content-center">
+                                          <h6 class="mb-0 text-sm">Paye (DH) </h6>
+                                          <input id="NbChambres" name="Mpaye" <?php if($res->Montant_Paye==$res->prix_total) echo"disabled" ; ?> value="0" type="text" class="form-control">
+                                      </div>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

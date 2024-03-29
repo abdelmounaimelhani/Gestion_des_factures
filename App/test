@@ -10,8 +10,8 @@ isset($_POST["DateLiv"])
 
 
 isset($_POST["NbChambres"])
-isset($_POST["LoChambre1"])
-isset($_POST["LaChambre1"])
+isset($_POST["Axe1"])
+isset($_POST["Vide1"])
 
 isset($_POST["MC"])
 isset($_POST["PTS"])

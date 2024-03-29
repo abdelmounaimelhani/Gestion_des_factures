@@ -24,15 +24,15 @@ function CreteCh(i){
     let td2=document.createElement('td')
     td2.innerHTML=`<div class="d-flex px-2 py-1">
                         <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Longueur</h6>
-                            <input name="LoChambre[]" id="LoChambre${i}" type="text" class="form-control">
+                            <h6 class="mb-0 text-sm">Axe</h6>
+                            <input name="Axe[]" id="Axe${i}" type="text" class="form-control">
                         </div>
                     </div>`
     let td3=document.createElement('td')
     td3.innerHTML=`<div class="d-flex px-2 py-1">
                         <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Largeur</h6>
-                            <input name="LaChambre[]" id="LaChambre${i}" type="text" class="form-control">
+                            <h6 class="mb-0 text-sm">Vide</h6>
+                            <input name="Vide[]" id="Vide${i}" type="text" class="form-control">
                         </div>
                     </div>`
     tr.appendChild(td1)
@@ -135,11 +135,11 @@ function calculerMat(){
     if (nbCh != 0) {
         submit.style.display='block'
         for (let i = 1; i < nbCh+1; i++) {
-            let LOCH=document.getElementById("LoChambre"+i)
-            let LACH=document.getElementById("LaChambre"+i)
-            let PTS = parseInt(Number(LACH.value)/0.62)
-            let M2 = LOCH.value * LACH.value
-            let Ml = PTS * LOCH.value 
+            let AXE=document.getElementById("Axe"+i)
+            let VIDE=document.getElementById("Vide"+i)
+            let PTS = parseInt(Number(AXE.value)/0.62)
+            let M2 = AXE.value * VIDE.value
+            let Ml = PTS * AXE.value 
             let HS = parseInt(M2*8.22)
             let G = Number(M2/10)
             let Prix = (HS*4.2)+(PTS*29)+(G*95)
